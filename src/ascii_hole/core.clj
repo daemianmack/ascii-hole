@@ -3,7 +3,7 @@
   (:require [clojure.core.async :refer [go-loop put! take! timeout]]))
 
 
-(def ^:dynamic *debug*      nil)
+(def ^:dynamic *debug*      true)
 (def ^:dynamic *get-key-fn* nil)
 (def ^:dynamic *on-key-fn*  nil)
 (def ^:dynamic *key-map*    nil)
