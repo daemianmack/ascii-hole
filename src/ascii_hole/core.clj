@@ -9,7 +9,7 @@
 (def ^:dynamic *key-map*    nil)
 
 
-(def announce-start #(do (println "Listening for keystrokes!") (flush)))
+(def announce-start #(do (println "Accepting keys!") (flush)))
 (def inspect-stroke #(when *debug* (println (format "Keystroke %d ('%c')." (int %) %))))
 (def read-char #(let [cr (ConsoleReader.)] (char (.readCharacter cr))))
 (defn eval-keyed-fn
