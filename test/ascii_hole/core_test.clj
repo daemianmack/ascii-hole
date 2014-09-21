@@ -9,4 +9,5 @@
 (deftest ctrl-char->char (is (= \ (->char \))))
 
 (deftest char-keys-works
-  (is (= {\c :c \d :d} (char-keys {:c :c :d :d}))))
+  (is (= {\a :a \b :b \c :c \d :d}
+         (char-keys {:a :a "b" :b 99 :c \d :d}))))
