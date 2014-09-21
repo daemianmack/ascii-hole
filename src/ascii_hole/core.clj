@@ -1,6 +1,6 @@
 (ns ascii-hole.core
   (:import [jline.console ConsoleReader])
-  (:require [clojure.core.async :refer [go-loop put! take! timeout]]))
+  (:require [clojure.core.async :refer [go-loop put! take!]]))
 
 
 (def ^:dynamic *debug*      true)
