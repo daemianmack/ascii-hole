@@ -60,4 +60,9 @@ These are equivalent...
   (ascii-hole/accept-keys {:key-map {4 #'reload-config}})
 ```
 
+Note that the \^D specified above represents an embedded control char literal:
+in Emacs, <kbd>Ctrl-Q</kbd> <kbd>\</kbd>, <kbd>Ctrl-Q</kbd> <kbd>Ctrl-D</kbd>;
+in Vim, <kbd>Ctrl-V</kbd> <kbd>\</kbd>, <kbd>Ctrl-V</kbd> <kbd>Ctrl-D</kbd>.
+
+
 
