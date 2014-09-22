@@ -1,6 +1,6 @@
 (ns ascii-hole.core
   (:import [jline.console ConsoleReader])
-  (:require [clojure.core.async :refer [go-loop put! take!]]
+  (:require [clojure.core.async :refer [go-loop]]
             [table.core :refer [table]]))
 
 
