@@ -42,7 +42,7 @@
     (merge {help-key do-print} key-map)))
 
 (def announce-start #(do (println "Accepting keys!") (flush)))
-(def inspect-stroke #(when *debug* (println (format "Accepting keystroke: %c ('%d')" % (int %)))))
+(def inspect-stroke #(when *debug* (println (format "Accepting keystroke: '%c' (ASCII %d)" % (int %)))))
 (def read-char #(let [cr (ConsoleReader.)] (char (.readCharacter cr))))
 (defn eval-keyed-fn
   [key-map stroke]
