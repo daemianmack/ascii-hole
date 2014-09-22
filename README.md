@@ -54,7 +54,7 @@ Specify non-printing control characters with char literals and ints.
 These are equivalent...
 
 ```clojure
-  (ascii-hole/accept-keys {:key-map {\ #'reload-config}})
+  (ascii-hole/accept-keys {:key-map {\^D #'reload-config}})
 ```
 ```clojure
   (ascii-hole/accept-keys {:key-map {4 #'reload-config}})
