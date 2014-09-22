@@ -8,5 +8,4 @@
                  [jline "2.11"]
                  [table "0.4.0"]]
   :profiles {:dev {:source-paths ["dev"]
-                   :aliases {"run-dev" ["trampoline" "run" "-m" "user/main"]}}}
-  :bootclasspath true)
+                   :aliases {"run-dev" ["trampoline" "run" "-m" "user/main"]}}})
