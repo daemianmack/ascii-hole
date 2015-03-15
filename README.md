@@ -12,7 +12,7 @@ This example run was powered by the following snippet...
 
 ```clojure
 (ns user
-  (:require [ascii-hole.core :as ascii-hole]
+  (:require [ascii-hole.core :as ah]
             [clojure.core.async :refer [timeout]]))
 
 (def counter (atom 0))
