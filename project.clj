@@ -1,4 +1,4 @@
-(defproject ascii-hole "0.1.0-SNAPSHOT"
+(defproject ascii-hole "0.1.1"
   :description "Let console keystrokes asynchronously trigger specified functions."
   :url "https://github.com/daemianmack/ascii-hole"
   :license {:name "Eclipse Public License"

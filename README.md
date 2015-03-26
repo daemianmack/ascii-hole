@@ -32,9 +32,9 @@ This example run was powered by the following snippet...
 ```
 
 # Usage
-Many of the functions used in `ascii-hole.core` are overridable... perhaps too many.
+Pressing `?` displays a menu advertising the available keystrokes.
 
-Keystrokes can be specified as keywords, strings, ints, and char literals.
+`:keymap` keystrokes can be specified as keywords, strings, ints, and char literals.
 That is, the following snippets are equivalent...
 
 ```clojure
@@ -50,18 +50,6 @@ That is, the following snippets are equivalent...
   (ascii-hole/accept-keys {:key-map {\R #'reload-config}})
 ```
 
-Specify non-printing control characters with char literals and ints.
-These are equivalent...
+Nominal effort has been made to ensure non-printing control-character keystrokes print usefully in the help menu. Zero effort has been made to warn you about assigning keys that might be silly in a given context, like trying to assign `^S` or `^Z` while in BASH.
 
-```clojure
-  (ascii-hole/accept-keys {:key-map {\^D #'reload-config}})
-```
-```clojure
-  (ascii-hole/accept-keys {:key-map {4 #'reload-config}})
-```
-
-Note that the \^D specified above represents an embedded control char literal:
-in Emacs, <kbd>ctrl</kbd>+<kbd>Q</kbd> <kbd>\\</kbd>,
-          <kbd>ctrl</kbd>+<kbd>Q</kbd> <kbd>ctrl</kbd>+<kbd>D</kbd>;
-in Vim,   <kbd>ctrl</kbd>+<kbd>V</kbd> <kbd>\\</kbd>,
-          <kbd>ctrl</kbd>+<kbd>V</kbd> <kbd>ctrl</kbd>+<kbd>D</kbd>.
+Many of the functions used in `ascii-hole.core` are overridable... perhaps too many.

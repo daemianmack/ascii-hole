@@ -14,11 +14,17 @@
 
 (def is-help-key? #(= (-> *help-stub* keys first) %))
 
+(defn mk-printable
+  [k]
+  (if (< 0 (int k) 26)
+    (format "^%s" (-> k int (+ 64) char))
+    k))
+
 (defn print-keys
   "Print available keys, their associated functions and docstrings."
   [key-map]
   (table (for [[k v] (sort-by is-help-key? key-map)]
-           {:key k :fn v :doc (some-> v meta :doc)})))
+           {:key (mk-printable k) :fn v :doc (some-> v meta :doc)})))
 
 
 (defmulti  ->char (fn [k] (type k)))
@@ -29,7 +35,6 @@
 
 (defn char-keys [m] (zipmap (->> m keys (map ->char))
                             (->> m vals)))
-
 
 (defn menu-map
   "Inject the help key into the key-map in such a way that the key can trigger
