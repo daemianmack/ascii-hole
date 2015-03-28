@@ -6,7 +6,7 @@ My use case: I have an app that doesn't need a UI, but as I review its console l
 
 # Visual example
 
-See here: https://asciinema.org/a/12354
+[![asciicast](https://asciinema.org/a/12354.png)](https://asciinema.org/a/12354)
 
 This example run was powered by the following snippet...
 
