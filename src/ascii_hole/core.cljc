@@ -1,37 +1,47 @@
 (ns ascii-hole.core
-  (:import [jline.console ConsoleReader])
-  (:require [clojure.core.async :refer [go-loop]]
-            [table.core :refer [table]]))
+  (:import #?(:clj [jline.console ConsoleReader]))
+  (:require #?(:clj [clojure.core.async :as a])
+            #?(:clj [table.core :refer [table]])))
+
+
+#?(:cljs
+   (def rl (js/require "readline")))
+
+#?(:clj
+   (defn read-char []
+     (let [cr (ConsoleReader.)] (char (.readCharacter cr)))))
 
 
 (declare print-keys)
 (def ^:dynamic *debug*      true)
-(def ^:dynamic *get-key-fn* nil)
-(def ^:dynamic *on-key-fn*  nil)
-(def ^:dynamic *key-map*    nil)
 (def ^:dynamic *help-stub*  {\? #'print-keys})
 
 
 (def is-help-key? #(= (-> *help-stub* keys first) %))
 
+(defn ->int [c]
+  #?(:clj (int c)
+     :cljs (.charCodeAt c 0)))
+
 (defn mk-printable
   [k]
-  (if (< 0 (int k) 26)
-    (format "^%s" (-> k int (+ 64) char))
+  (if (< 0 (->int k) 26)
+    (str "^" (-> k ->int (+ 64) char))
     k))
 
 (defn print-keys
   "Print available keys, their associated functions and docstrings."
   [key-map]
-  (table (for [[k v] (sort-by is-help-key? key-map)]
-           {:key (mk-printable k) :fn v :doc (some-> v meta :doc)})))
+  #?(:clj (table (for [[k v] (sort-by is-help-key? key-map)]
+                   {:key (mk-printable k) :fn v :doc (some-> v meta :doc)}))
+     :cljs (print key-map)))
 
-
-(defmulti  ->char (fn [k] (type k)))
-(defmethod ->char clojure.lang.Keyword [k] (->char (name k)))
-(defmethod ->char java.lang.String     [k] (->char (.charAt k 0)))
-(defmethod ->char java.lang.Long       [k] (->char (char k)))
-(defmethod ->char java.lang.Character  [k] k)
+(defn ->char [x]
+  (cond
+     (char?    x) x
+     (keyword? x) (->char (name x))
+     (string?  x) (->char (.charAt x 0))
+     (number?  x) (->char (char x))))
 
 (defn char-keys [m] (zipmap (->> m keys (map ->char))
                             (->> m vals)))
@@ -47,8 +57,11 @@
     (merge {help-key do-print} key-map)))
 
 (def announce-start #(do (println "Accepting keys!") (flush)))
-(def inspect-stroke #(when *debug* (println (format "Accepting keystroke: '%c' (ASCII %d)" % (int %)))))
-(def read-char #(let [cr (ConsoleReader.)] (char (.readCharacter cr))))
+
+(def inspect-stroke
+  #(when *debug*
+     (println (str "Accepting keystroke: '" (mk-printable %) "' (ASCII " (->int %) ")"))))
+
 (defn eval-keyed-fn
   [key-map stroke]
   (inspect-stroke stroke)
@@ -56,13 +69,31 @@
 
 (defn accept-keys
   ([] (accept-keys {}))
-  ([{:keys [on-init-fn get-key-fn on-key-fn key-map]
-     :or   {on-init-fn announce-start
-            get-key-fn read-char
-            on-key-fn  eval-keyed-fn} :as options}]
-     (on-init-fn)
-     (go-loop [the-char ((or *get-key-fn* get-key-fn))]
-       (let [on-key-fn  (or *on-key-fn* on-key-fn)
-             menu       (-> *key-map* (or key-map) char-keys menu-map)]
-         (on-key-fn menu the-char))
-       (recur ((or *get-key-fn* get-key-fn))))))
+  ([{:keys [on-init-fn key-map]
+     :or   {on-init-fn announce-start} :as options}]
+   (on-init-fn)
+   ;; JVM/JS differences:
+   ;; - JS has no proper Chars, only Strings which satisfy `char?` if
+   ;;   one character in length.
+   ;; - Would prefer these two forms share an implementation or even
+   ;;   similar shape, but non-JVM core.async appears to require
+   ;;   mfike's andare, requiring which causes a 50-second load delay.
+   #?(:clj (a/go-loop [the-char (read-char)]
+             (let [menu (-> key-map char-keys menu-map)]
+               (eval-keyed-fn menu the-char))
+             (recur (read-char)))
+      :cljs (do (.emitKeypressEvents rl (.-stdin js/process))
+                (.setRawMode (.-stdin js/process) true)
+                (.on (.-stdin js/process) "keypress"
+                     (fn [the-char key]
+                       ;; e.g. arrowkeys issue a key but not a char.
+                       (when the-char
+                         ;; JS STDIN's .setRawMode is necessary to
+                         ;; trap single keypresses but has the
+                         ;; side-effect of treating control characters
+                         ;; unspecially, thus we have to detect Ctrl+C
+                         ;; and exit manually.
+                         (when (= 3 (->int the-char))
+                           (.exit js/process 1))
+                         (let [menu (-> key-map char-keys menu-map)]
+                           (eval-keyed-fn menu the-char)))))))))
