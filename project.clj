@@ -5,7 +5,6 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/core.async "0.3.441"]
-                 [jline "2.11"]
-                 [table "0.4.0"]]
+                 [jline "2.11"]]
   :profiles {:dev {:source-paths ["dev"]
                    :aliases {"run-dev" ["trampoline" "run" "-m" "user/main"]}}})

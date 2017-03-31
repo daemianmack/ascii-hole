@@ -1,7 +1,8 @@
 (ns ascii-hole.core
   (:import #?(:clj [jline.console ConsoleReader]))
   (:require #?(:clj [clojure.core.async :as a])
-            #?(:clj [table.core :refer [table]])))
+            #?(:clj  [clojure.pprint :refer [print-table]]
+               :cljs [cljs.pprint    :refer [print-table]])))
 
 
 #?(:cljs
@@ -32,14 +33,10 @@
 (defn print-keys
   "Print available keys, their associated functions and docstrings."
   [key-map]
-  #?(:clj (table (for [[k v] (sort-by is-help-key? key-map)
-                       :let [fn  (or (:fn v) v)
-                             doc (or (:doc v) (some-> v meta :doc))]]
-                   {:key (mk-printable k) :fn fn :doc doc}))
-     :cljs (print (for [[k v] (sort-by is-help-key? key-map)
-                        :let [fn  (or (:fn-name v) (:fn v) v)
-                              doc (or (:doc v) (some-> v meta :doc))]]
-                    {:key (mk-printable k) :fn fn :doc doc}))))
+  (print-table (for [[k v] (sort-by is-help-key? key-map)
+                     :let [fn  (or (:fn-name v) (:fn v) v)
+                           doc (or (:doc v) (some-> v meta :doc))]]
+                 {:key (mk-printable k) :fn fn :doc doc})))
 
 (defn ->char [x]
   (cond
