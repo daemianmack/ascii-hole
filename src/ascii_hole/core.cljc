@@ -32,9 +32,14 @@
 (defn print-keys
   "Print available keys, their associated functions and docstrings."
   [key-map]
-  #?(:clj (table (for [[k v] (sort-by is-help-key? key-map)]
-                   {:key (mk-printable k) :fn v :doc (some-> v meta :doc)}))
-     :cljs (print key-map)))
+  #?(:clj (table (for [[k v] (sort-by is-help-key? key-map)
+                       :let [fn  (or (:fn v) v)
+                             doc (or (:doc v) (some-> v meta :doc))]]
+                   {:key (mk-printable k) :fn fn :doc doc}))
+     :cljs (print (for [[k v] (sort-by is-help-key? key-map)
+                        :let [fn  (or (:fn-name v) (:fn v) v)
+                              doc (or (:doc v) (some-> v meta :doc))]]
+                    {:key (mk-printable k) :fn fn :doc doc}))))
 
 (defn ->char [x]
   (cond
@@ -65,7 +70,9 @@
 (defn eval-keyed-fn
   [key-map stroke]
   (inspect-stroke stroke)
-  (when-let [requested-fn (get key-map stroke)] (requested-fn)))
+  (when-let [requested-fn (get-in key-map [stroke :fn]
+                                  (get key-map stroke))]
+    (requested-fn)))
 
 (defn accept-keys
   ([] (accept-keys {}))
