@@ -14,7 +14,7 @@
 
 
 (declare print-keys)
-(def ^:dynamic *debug*      true)
+(def ^:dynamic *debug*      false)
 (def ^:dynamic *help-stub*  {\? #'print-keys})
 
 
