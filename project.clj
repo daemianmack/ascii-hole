@@ -7,4 +7,4 @@
                  [org.clojure/core.async "0.3.441"]
                  [jline "2.11"]]
   :profiles {:dev {:source-paths ["dev"]
-                   :aliases {"run-dev" ["trampoline" "run" "-m" "user/main"]}}})
+                   :aliases {"run-dev" ["trampoline" "run" "-m" "dev.user/-main"]}}})
