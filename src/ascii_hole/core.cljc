@@ -31,7 +31,9 @@
   (print-table (for [[k v] (sort-by is-help-key? key-map)
                      :let [fn  (or (:fn-name v) (:fn v) v)
                            doc (or (:doc v) (some-> v meta :doc))]]
-                 {:key k :fn fn :doc doc})))
+                 {:key (name k)
+                  :fn fn
+                  :doc doc})))
 
 (defn menu-map
   "Inject the help key into the key-map in such a way that the key can trigger
