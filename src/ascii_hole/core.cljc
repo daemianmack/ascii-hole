@@ -2,9 +2,8 @@
   (:import #?(:clj [jline.console ConsoleReader]))
   (:require [clojure.string :as s]
             [ascii-hole.keycodes :as keycodes]
-            #?(:clj [clojure.core.async :as a])
-            #?(:clj  [clojure.pprint :refer [print-table]]
-               :cljs [cljs.pprint    :refer [print-table]])))
+            [clojure.pprint :refer [print-table]]
+            #?(:clj [clojure.core.async :as a])))
 
 (def global-key-map (atom nil))
 
@@ -44,10 +43,11 @@
         help-key  (-> *help-stub* keys first)]
     (merge {help-key do-print} key-map)))
 
-(def announce-start #(do (println "Accepting keys! Press"
-                                  (-> *help-stub* keys first name)
-                                  "for help.")
-                         (flush)))
+(def announce-start
+  #(do (println "Accepting keys! Press"
+                (-> *help-stub* keys first name)
+                "for help.")
+       (flush)))
 
 (def inspect-stroke
   #(when *debug*
@@ -63,37 +63,37 @@
 
 
 #?(:clj
-   (defn read-one-line [prompt cb]
+   (defn accept-line [prompt cb]
      (let [input (.readLine cr prompt)]
        (cb input))))
 
 #?(:clj
-   (defn read-one-key []
+   (defn accept-key []
      (-> cr .readCharacter keycodes/by-int)))
 
 
 #?(:cljs
-   (declare listen-for-key))
+   (declare accept-key))
 
 #?(:cljs
-   (defn read-one-line [cb input-buffer]
+   (defn process-line [cb input-buffer]
      (cb (s/trim (.toString input-buffer "utf-8")))
-     (listen-for-key)))
+     (accept-key)))
 
 #?(:cljs
-   (declare read-one-key))
+   (declare process-key))
 
 #?(:cljs
-   (defn listen-for-line [prompt cb]
-     (.removeListener stdin "keypress" read-one-key)
+   (defn accept-line [prompt cb]
+     (.removeListener stdin "keypress" process-key)
      (.setRawMode stdin false)
      (print prompt)
-     (let [lfn (partial read-one-line cb)]
+     (let [lfn (partial process-line cb)]
        (reset! line-listener lfn)
        (.on stdin "data" lfn))))
 
 #?(:cljs
-   (defn read-one-key [str key]
+   (defn process-key [str key]
      (let [k (js->clj key :keywordize-keys true)]
        (when-let [keystroke (keycodes/by-str k)]
          ;; JS STDIN's .setRawMode is necessary to trap single
@@ -105,11 +105,11 @@
          (eval-keyed-fn keystroke)))))
 
 #?(:cljs
-   (defn listen-for-key []
+   (defn accept-key []
      (.setRawMode stdin true)
      (.removeListener stdin "data" @line-listener)
      (reset! line-listener nil)
-     (.on stdin "keypress" read-one-key)))
+     (.on stdin "keypress" process-key)))
 
 
 (defn accept-keys
@@ -118,13 +118,10 @@
      :or   {on-init-fn announce-start} :as options}]
    (on-init-fn)
    (reset! global-key-map key-map)
-   ;; JVM/JS differences:
-   ;; - JS has no proper Chars, only Strings which satisfy `char?` if
-   ;;   one character in length.
-   ;; - Would prefer these two forms share an implementation or even
-   ;;   similar shape, but non-JVM core.async appears to require
-   ;;   mfike's andare, requiring which causes a 50-second load delay.
-   #?(:clj (a/go-loop [the-char (read-one-key)]
-             (eval-keyed-fn the-char)
-             (recur (read-one-key)))
-      :cljs (listen-for-key))))
+   ;; Would prefer these two forms share an implementation or even
+   ;; similar shape, but non-JVM core.async appears to require mfike's
+   ;; andare, requiring which causes a 20-second load delay.
+   #?(:clj (a/go-loop [keystroke (accept-key)]
+             (eval-keyed-fn keystroke)
+             (recur (accept-key)))
+      :cljs (accept-key))))
