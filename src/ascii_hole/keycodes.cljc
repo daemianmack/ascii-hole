@@ -1,50 +1,57 @@
 (ns ascii-hole.keycodes
-  (:require [clojure.set :refer [map-invert]]))
+  (:require [clojure.set :refer [map-invert]]
+            [clojure.string :refer [upper-case]]))
 
 
 ;; Provide a mapping to canonical names.
-;; JVM's ConsoleReader exposes keypresses as chars.
-;; JS exposes them as strings and maps of data, e.g.,
-;;   #js {:sequence "|", :name nil, :ctrl false, :meta false, :shift false}
-;; but these seem inconsistent.
-;; npm's `terminal-kit` provides a convenience layer over those maps by
-;; assigning names and correcting those inconsistencies.
+
+;; JVM's ConsoleReader exposes keypresses as integers.
+;; JS exposes them as strings (ignored here) and maps of data, e.g.,
+;;        q => {:sequence "", :name "q", :ctrl true, :meta false, :shift false}
+;;        Q => {:sequence "", :name "q", :ctrl true, :meta false, :shift true}
+;;   Ctrl+q => {:sequence "", :name "q", :ctrl true, :meta false, :shift false}
+;;   Delete => {:sequence "",   :name "backspace", :ctrl false, :meta false, :shift false}
+;;   Ctrl+h => {:sequence "\b", :name "backspace", :ctrl false, :meta false, :shift false}
 
 ;; NB: Not all keystrokes are available in both environments, and some
 ;; have meaning at the system level (e.g., ^\).
+
+;; The goal below is to expose names that will make the most sense to
+;; users, so I've helpfully compounded the cross-platform
+;; inconsistencies by applying a heavy layer of subjectivity. YW.
 (def canonical-mapping
-  {:ctrl_a {:int 1 :str "CTRL_A"}
-   :ctrl_b {:int 2 :str "CTRL_B"}
-   :ctrl_c {:int 3 :str "CTRL_C"}
-   :ctrl_d {:int 4 :str "CTRL_D"}
-   :ctrl_e {:int 5 :str "CTRL_E"}
-   :ctrl_f {:int 6 :str "CTRL_F"}
-   :ctrl_g {:int 7 :str "CTRL_G"}
-   :ctrl_h {:int 8 :str "BACKSPACE"}
-   :ctrl_i {:int 9 :str "TAB"}
-   :ctrl_j {:int 10 :str "CTRL_J"}
-   :ctrl_k {:int 11 :str "CTRL_K"}
-   :ctrl_l {:int 12 :str "CTRL_L"}
-   :ctrl_m {:int 13 :str "ENTER"}
-   :ctrl_n {:int 14 :str "CTRL_N"}
-   :ctrl_o {:int 15 :str "CTRL_O"}
-   :ctrl_p {:int 16 :str "CTRL_P"}
-   :ctrl_q {:int 17 :str "CTRL_Q"}
-   :ctrl_r {:int 18 :str "CTRL_R"}
-   :ctrl_s {:int 19 :str "CTRL_S"}
-   :ctrl_t {:int 20 :str "CTRL_T"}
-   :ctrl_u {:int 21 :str "CTRL_U"}
-   :ctrl_v {:int 22 :str "CTRL_V"}
-   :ctrl_w {:int 23 :str "CTRL_W"}
-   :ctrl_x {:int 24 :str "CTRL_X"}
-   :ctrl_y {:int 25 :str "CTRL_Y"}
-   :ctrl_z {:int 26 :str "CTRL_Z"}
-   :escape {:int 27 :str "ESCAPE"} ;; ^[
+  {:ctrl_a {:int 1 :str "ctrl_a"}
+   :ctrl_b {:int 2 :str "ctrl_b"}
+   :ctrl_c {:int 3 :str "ctrl_c"}
+   :ctrl_d {:int 4 :str "ctrl_d"}
+   :ctrl_e {:int 5 :str "ctrl_e"}
+   :ctrl_f {:int 6 :str "ctrl_f"}
+   :ctrl_g {:int 7 :str "ctrl_g"}
+   :ctrl_h {:int 8}
+   :tab {:int 9 :str "tab"}
+   :ctrl_j {:int 10 :str "enter"}
+   :ctrl_k {:int 11 :str "ctrl_k"}
+   :ctrl_l {:int 12 :str "ctrl_l"}
+   :enter  {:int 13 :str "return"}
+   :ctrl_n {:int 14 :str "ctrl_n"}
+   :ctrl_o {:int 15 :str "ctrl_o"}
+   :ctrl_p {:int 16 :str "ctrl_p"}
+   :ctrl_q {:int 17 :str "ctrl_q"}
+   :ctrl_r {:int 18 :str "ctrl_r"}
+   :ctrl_s {:int 19 :str "ctrl_s"}
+   :ctrl_t {:int 20 :str "ctrl_t"}
+   :ctrl_u {:int 21 :str "ctrl_u"}
+   :ctrl_v {:int 22 :str "ctrl_v"}
+   :ctrl_w {:int 23 :str "ctrl_w"}
+   :ctrl_x {:int 24 :str "ctrl_x"}
+   :ctrl_y {:int 25 :str "ctrl_y"}
+   :ctrl_z {:int 26 :str "ctrl_z"}
+   :escape {:int 27 :str "escape"} ;; ^[
    ;; :28 {:int 28 :str ""}
    :29 {:int 29 :str ""}
    :30 {:int 30 :str ""}
    :31 {:int 31 :str ""}
-   :space {:int 32 :str " "}
+   :space {:int 32 :str "space"}
    :bang {:int 33 :str "!"}
    :quote {:int 34 :str "\""}
    :hash {:int 35 :str "#"}
@@ -139,18 +146,36 @@
    :pipe {:int 124 :str "|"}
    :right-brace {:int 125 :str "}"}
    :tilde {:int 126 :str "~"}
-   :backspace {:int 127 :str "BACKSPACE"}})
+   :del {:int 127 :str "backspace"}})
+
+(defn safe-assoc [m k v]
+  (assert (not (contains? m k))
+          (str "Key already present: " k))
+  (assoc m k v))
 
 (defn key-by-child-val
   [child-val mapping]
   (reduce
    (fn [acc [k v]]
-     (assoc acc (get k child-val) v))
+     ;; Ignore entries without the corresponding `child-val` key.
+     (if-let [val (get k child-val)]
+       ;; Catch entries with duplicated values.
+       (safe-assoc acc val v)
+       acc))
    {}
    (map-invert mapping)))
 
 (def by-int
   (key-by-child-val :int canonical-mapping))
 
-(def by-str
+(def by-str*
   (key-by-child-val :str canonical-mapping))
+
+(defn by-str [{:keys [sequence name ctrl shift] :as js-char-map}]
+  (let [key (cond
+              (nil? name) sequence
+              ctrl        (str "ctrl_" name)
+              shift       (upper-case name)
+              :else       name)]
+    (when-let [keystroke (by-str* key)]
+      keystroke)))
