@@ -4,6 +4,8 @@ ascii-hole lets you wire a simple menu to your app's STDIN.
 
 My use case: I have an app that doesn't need a UI, but as I review its console logging statements, I would occasionally like to send commands to the app to reload the config or query the data.
 
+
+
 # Visual example
 
 [![asciicast](https://asciinema.org/a/12354.png)](https://asciinema.org/a/12354)
@@ -31,25 +33,54 @@ This example run was powered by the following snippet...
           :config-reloaded-num-times @counter})))
 ```
 
+
+
 # Usage
+
 Pressing `?` displays a menu advertising the available keystrokes.
 
-`:keymap` keystrokes can be specified as keywords, strings, ints, and char literals.
-That is, the following snippets are equivalent...
+`:keymap` keystrokes can be specified using somewhat arbitrary [human keyword names].
+
+[human keyword names]: src/ascii_hole/keycodes.cljc
 
 ```clojure
+  ;; Accept keypress of `R`.
   (ascii-hole/accept-keys {:key-map {:R #'reload-config}})
 ```
 ```clojure
-  (ascii-hole/accept-keys {:key-map {"R" #'reload-config}})
+  ;; Accept keypress of `Ctrl+r`.
+  (ascii-hole/accept-keys {:key-map {:ctrl_r #'reload-config}})
 ```
-```clojure
-  (ascii-hole/accept-keys {:key-map {82 #'reload-config}})
+A var specifies a callable function.
+
+The above demonstrates the general case for configuration, but you may
+want to display a friendlier name or include a line of documentation
+to the help menu. Also, in ClojureScript, lambdas will print terribly,
+so, `accept-keys` will also accept a map offering more control over
+menu printout...
+
 ```
-```clojure
-  (ascii-hole/accept-keys {:key-map {\R #'reload-config}})
+(ascii-hole/accept-keys {:key-map {:p {:fn #(prn "Hi, it's me, a lambda.")
+                                       :fn-name 'demonstrate-lambda
+                                       :doc "Demonstrate a friendly lambda."}}})
+
 ```
 
-Nominal effort has been made to ensure non-printing control-character keystrokes print usefully in the help menu. Zero effort has been made to warn you about assigning keys that might be silly in a given context, like trying to assign `^S` or `^Z` while in BASH.
+In addition to `accept-keys`, which traps single keypresses, there's
+an `accept-line` function which expects a text prompt and a callback
+function. When triggered, it will print the prompt and accept input,
+terminating on an EOF, at which point the input will be passed to the
+callback for the consuming program to handle. [Example]
 
-Many of the functions used in `ascii-hole.core` are overridable... perhaps too many.
+[Example]: dev/user.cljs#L32-36
+
+
+# ClojureScript support
+
+AsciiHole's ClojureScript support targets [Lumo]. Expanding it to
+support [Planck] is possible but unplanned.
+
+[Lumo]:https://github.com/anmonteiro/lumo
+[Planck]:https://github.com/mfikes/planck
+
+
