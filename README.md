@@ -1,4 +1,4 @@
-# What's this?
+## What's this?
 
 ascii-hole lets you wire a simple menu to your app's STDIN.
 
@@ -6,7 +6,15 @@ My use case: I have an app that doesn't need a UI, but as I review its console l
 
 
 
-# Visual example
+## Installation
+
+`ascii-hole` is deployed to Clojars for Clojure projects...
+
+[ascii-hole "0.3.1"]
+
+
+
+## Visual example
 
 [![asciicast](https://asciinema.org/a/12354.png)](https://asciinema.org/a/12354)
 
@@ -35,7 +43,7 @@ This example run was powered by the following snippet...
 
 
 
-# Usage
+## Usage
 
 Pressing `?` displays a menu advertising the available keystrokes.
 
@@ -78,7 +86,7 @@ callback for the consuming program to handle. [Example code]
 
 
 
-# ClojureScript support
+## ClojureScript support
 
 AsciiHole's ClojureScript support targets [Lumo]. Expanding it to
 support [Planck] is possible but unplanned.
