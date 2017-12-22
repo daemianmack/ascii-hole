@@ -18,7 +18,9 @@
 
 (declare print-keys)
 (def ^:dynamic *debug*      false)
-(def ^:dynamic *help-stub*  {:? #'print-keys})
+(def ^:dynamic *help-stub*  {:? {:fn #'print-keys
+                                 :fn-name 'print-help
+                                 :doc "Print help menu."}})
 
 
 (def is-help-key? #(= (-> *help-stub* keys first) %))
@@ -37,7 +39,7 @@
   "Inject the help key into the key-map in such a way that the key can trigger
    a printout yet also show up as an available key in that printout."
   [key-map]
-  (let [help-fn   (-> *help-stub* vals first)
+  (let [help-fn   (-> *help-stub* vals first :fn)
         printable (merge *help-stub* key-map)  ;; "Dummy" reference to the print-key fn.
         do-print  #(help-fn printable)
         help-key  (-> *help-stub* keys first)]
