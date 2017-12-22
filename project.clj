@@ -1,5 +1,5 @@
-(defproject ascii-hole "0.2.0"
-  :description "Let console keystrokes asynchronously trigger specified functions."
+(defproject ascii-hole "0.3.0"
+  :description "Let console keystrokes asynchronously trigger specified CLJ/CLJS functions."
   :url "https://github.com/daemianmack/ascii-hole"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
