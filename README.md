@@ -72,7 +72,7 @@ function. When triggered, it will print the prompt and accept input,
 terminating on an EOF, at which point the input will be passed to the
 callback for the consuming program to handle. [Example code]
 
-[Example code]: dev/user.cljs#L32-36
+[Example code]: dev/user.cljs#L33-L37
 
 [![asciicast](https://asciinema.org/a/VPnXjh6zJFZwyCsCj4yQxTR5h.png)](https://asciinema.org/a/VPnXjh6zJFZwyCsCj4yQxTR5h)
 
