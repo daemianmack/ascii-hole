@@ -8,7 +8,7 @@ My use case: I have an app that doesn't need a UI, but as I review its console l
 
 # Visual example
 
-[![asciicast](https://asciinema.org/a/d75PI0oVCiTYr9opV5sljSPuF.png)](https://asciinema.org/a/d75PI0oVCiTYr9opV5sljSPuF)
+[![asciicast](https://asciinema.org/a/12354.png)](https://asciinema.org/a/12354)
 
 This example run was powered by the following snippet...
 
@@ -41,7 +41,7 @@ Pressing `?` displays a menu advertising the available keystrokes.
 
 `:keymap` keystrokes can be specified using somewhat arbitrary [human keyword names].
 
-[human keyword names]: src/ascii_hole/keycodes.cljc
+[human keyword names]: src/ascii_hole/keycodes.cljc#L22
 
 ```clojure
   ;; Accept keypress of `R`.
@@ -70,9 +70,12 @@ In addition to `accept-keys`, which traps single keypresses, there's
 an `accept-line` function which expects a text prompt and a callback
 function. When triggered, it will print the prompt and accept input,
 terminating on an EOF, at which point the input will be passed to the
-callback for the consuming program to handle. [Example]
+callback for the consuming program to handle. [Example code]
 
-[Example]: dev/user.cljs#L32-36
+[Example code]: dev/user.cljs#L32-36
+
+[![asciicast](https://asciinema.org/a/VPnXjh6zJFZwyCsCj4yQxTR5h.png)](https://asciinema.org/a/VPnXjh6zJFZwyCsCj4yQxTR5h)
+
 
 
 # ClojureScript support
