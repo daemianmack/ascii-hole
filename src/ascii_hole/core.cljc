@@ -26,11 +26,15 @@
 (def is-help-key? #(= (-> *help-stub* keys first) %))
 
 (defn print-keys
-  "Print available keys, their associated functions and docstrings."
+  "Print available keys, their associated functions and documentation."
   [key-map]
   (print-table (for [[k v] (sort-by is-help-key? key-map)
-                     :let [fn  (or (:fn-name v) (:fn v) v)
-                           doc (or (:doc v) (some-> v meta :doc))]]
+                     :let [fn  (or (:fn-name v)
+                                   (-> v :fn meta :name)
+                                   (-> v meta :name))
+                           doc (or (:doc v)
+                                   (-> v :fn meta :doc)
+                                   (-> v meta :doc))]]
                  {"key" (name k)
                   "fn"  fn
                   "doc" doc})))
