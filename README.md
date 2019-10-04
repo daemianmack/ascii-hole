@@ -78,12 +78,9 @@ In addition to `accept-keys`, which traps single keypresses, there's
 an `accept-line` function which expects a text prompt and a callback
 function. When triggered, it will print the prompt and accept input,
 terminating on an EOF, at which point the input will be passed to the
-callback for the consuming program to handle. [Example code]
+callback for the consuming program to handle. 
 
-[Example code]: dev/user.cljs#L33-L37
-
-[![asciicast](https://asciinema.org/a/VPnXjh6zJFZwyCsCj4yQxTR5h.png)](https://asciinema.org/a/VPnXjh6zJFZwyCsCj4yQxTR5h)
-
+[![asciicast](https://asciinema.org/a/272524.svg)](https://asciinema.org/a/272524)
 
 
 ## ClojureScript support
